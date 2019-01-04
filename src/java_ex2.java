@@ -45,7 +45,7 @@ public class java_ex2 {
 
         String[] resultsDT = DT.predict(data, labels);
         String[] resultsKNN = KNN.predict(data, labels, test);
-        String[] resultsNaive = Naive.predict(data, labels);
+        String[] resultsNaive = Naive.predict(data, labels, test);
 
         //writing the results
         List<String> lines = new LinkedList<>();
