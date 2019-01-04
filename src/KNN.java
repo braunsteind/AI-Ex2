@@ -5,14 +5,25 @@ import java.util.List;
 public class KNN {
     private static final int K = 5;
 
-    public static String[] KNN(String[][] data, String[] lables) {
+    public static String[] KNN(Example[] data, String[] labels) {
+        String[] results = new String[data.length];
+
         //go over the data
         for (int i = 0; i < data.length; i++) {
-            calcLabel(data, lables, i);
+            results[i] = calcLabel(data, labels, i);
         }
+
+        return results;
     }
 
-    private static String calcLabel(String[][] data, String[] labels, int myIndex) {
+    /**
+     * Calculate the label of a given example
+     * @param data The data set
+     * @param labels The possible labels
+     * @param myIndex The given example
+     * @return The predicted label
+     */
+    private static String calcLabel(Example[] data, String[] labels, int myIndex) {
         List<Point> distances = new LinkedList<>();
         int i;
 
@@ -29,15 +40,17 @@ public class KNN {
         }
 
         //sort the distances
-        distances.sort((o1, o2) -> o2.distance - o1.distance);
+        distances.sort(Comparator.comparingInt(o -> o.distance));
 
-        int labelIndex = data[0].length - 1;
+        //get the index of the label
         int[] label = new int[2];
         //check the label with KNN
         //go over the KNN examples and count their labels
         for (i = 0; i < K; i++) {
+            //get close example
             int index = distances.get(i).index;
-            if (data[index][labelIndex].equals(labels[0])) {
+            //check its label
+            if (data[index].getLabel().equals(labels[0])) {
                 label[0]++;
             } else {
                 label[1]++;
@@ -52,10 +65,14 @@ public class KNN {
     }
 
     //calculate the hamming distance
-    private static int calcDistance(String[] a, String[] b) {
+    private static int calcDistance(Example a, Example b) {
         int distance = 0;
-        for (int i = 0; i < a.length; i++) {
-            if (!a[i].equals(b[i])) {
+        String[] aFields = a.getFields();
+        String[] bFields = b.getFields();
+
+        //go over the fields and check if equal
+        for (int i = 0; i < aFields.length; i++) {
+            if (!aFields[i].equals(bFields[i])) {
                 distance++;
             }
         }

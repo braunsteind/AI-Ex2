@@ -72,19 +72,21 @@ public class DataReader {
     }
 
     //get the data set from the file
-    public String[][] getData() throws Exception {
+    public Example[] getData() throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(path));
 
         //skip the first line (not a data)
         br.readLine();
 
         //build the data set
-        String[][] data = new String[rows - 1][cols];
+        Example[] data = new Example[rows - 1];
         for (int i = 0; i < rows - 1; i++) {
-            //read the first line and split the fields
+            //read line and split the fields
             String[] split = br.readLine().split("\t");
-            //copy the rows to matrix
-            System.arraycopy(split, 0, data[i], 0, cols);
+            //copy the fields
+            String[] fields = new String[cols - 1];
+            System.arraycopy(split, 0, fields, 0, cols - 1);
+            data[i] = new Example(fields, split[cols - 1]);
         }
         return data;
     }

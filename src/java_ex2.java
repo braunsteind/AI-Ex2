@@ -4,7 +4,7 @@ public class java_ex2 {
     public static void main(String[] args) {
         String[] fields = null;
         String[] labels = null;
-        String[][] data = null;
+        Example[] data = null;
 
         try {
             DataReader dataReader = new DataReader(PATH);
@@ -23,5 +23,7 @@ public class java_ex2 {
         System.out.println("-------");
         System.out.println(labels[0]);
         System.out.println(labels[1]);
+
+        KNN.KNN(data,labels);
     }
 }
