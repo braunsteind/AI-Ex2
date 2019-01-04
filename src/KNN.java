@@ -5,12 +5,13 @@ import java.util.List;
 public class KNN {
     private static final int K = 5;
 
-    public static String[] KNN(Example[] data, String[] labels) {
-        String[] results = new String[data.length];
+    //predict the labels
+    public static String[] predict(Example[] data, String[] labels, Example[] test) {
+        String[] results = new String[test.length];
 
         //go over the data
-        for (int i = 0; i < data.length; i++) {
-            results[i] = calcLabel(data, labels, i);
+        for (int i = 0; i < test.length; i++) {
+            results[i] = calcLabel(data, labels, test[i]);
         }
 
         return results;
@@ -18,33 +19,38 @@ public class KNN {
 
     /**
      * Calculate the label of a given example
-     * @param data The data set
-     * @param labels The possible labels
-     * @param myIndex The given example
+     *
+     * @param data    The data set
+     * @param labels  The possible labels
+     * @param example The given example
      * @return The predicted label
      */
-    private static String calcLabel(Example[] data, String[] labels, int myIndex) {
+    private static String calcLabel(Example[] data, String[] labels, Example example) {
         List<Point> distances = new LinkedList<>();
         int i;
 
-        //go over the data (skip the given example)
-        for (i = 0; i < myIndex; i++) {
-            //calculate the distance
-            int distance = calcDistance(data[myIndex], data[i]);
-            distances.add(new Point(i, distance));
-        }
-        for (i++; i < data.length; i++) {
-            //calculate the distance
-            int distance = calcDistance(data[myIndex], data[i]);
+        //go over the data
+        for (i = 0; i < data.length; i++) {
+            //calculate the distance of the example from data[i]
+            int distance = calcDistance(example, data[i]);
+            //add the distance to list
             distances.add(new Point(i, distance));
         }
 
-        //sort the distances
-        distances.sort(Comparator.comparingInt(o -> o.distance));
+        //sort the distances first by distance, second by index (smaller first)
+        distances.sort(new Comparator<Point>() {
+            @Override
+            public int compare(Point o1, Point o2) {
+                int result = o1.distance - o2.distance;
+                if (result != 0) {
+                    return result;
+                }
+                return o1.index - o2.index;
+            }
+        });
 
         //get the index of the label
         int[] label = new int[2];
-        //check the label with KNN
         //go over the KNN examples and count their labels
         for (i = 0; i < K; i++) {
             //get close example
