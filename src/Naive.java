@@ -50,16 +50,16 @@ public class Naive {
         //result for label 1
         double result1 = 1;
         for (int field : fieldCounter[0]) {
-            result1 *= (double) ((double) field / (double) total[0]);
+            result1 *= (double) field / (double) total[0];
         }
-        result1 *= (double) ((double) total[0] / (double) ((double) total[0] + (double) total[1]));
+        result1 *= (double) total[0] / ((double) total[0] + (double) total[1]);
 
         //result for label 2
         double result2 = 1;
         for (int field : fieldCounter[1]) {
-            result2 *= (double) ((double) field / (double) total[1]);
+            result2 *= (double) field / (double) total[1];
         }
-        result2 *= (double) ((double) total[1] / ((double) ((double) total[0] + (double) total[1])));
+        result2 *= (double) total[1] / (((double) total[0] + (double) total[1]));
 
         if (result1 > result2) {
             return labels[0];
