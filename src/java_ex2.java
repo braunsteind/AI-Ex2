@@ -37,7 +37,8 @@ public class java_ex2 {
             return;
         }
 
-        String[] resultsDT = DT.predict(data, labels);
+        DT dt = new DT();
+        String[] resultsDT = dt.predict(data, labels);
         String[] resultsKNN = KNN.predict(data, labels, test);
         String[] resultsNaive = Naive.predict(data, labels, test);
 

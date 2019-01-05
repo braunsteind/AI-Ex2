@@ -64,6 +64,14 @@ public class Naive {
         if (result1 > result2) {
             return labels[0];
         }
+        if (result1 < result2) {
+            return labels[1];
+        }
+
+        //if results equal choose by the majority of the examples
+        if (total[0] > total[1]) {
+            return labels[0];
+        }
         return labels[1];
     }
 }
