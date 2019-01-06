@@ -1,4 +1,7 @@
+//Implementation of the naive bayes algorithm
+//The class predict the label of examples using bayes rules
 public class Naive {
+    //predict the labels of the examples
     public static String[] predict(Example[] data, String[] labels, Example[] test) {
         String[] results = new String[test.length];
 

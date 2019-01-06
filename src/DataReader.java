@@ -11,6 +11,7 @@ public class DataReader {
     private int cols;
     private int rows;
 
+    //read the data from the path
     public DataReader(String path) throws Exception {
         this.path = path;
         BufferedReader br = new BufferedReader(new FileReader(path));

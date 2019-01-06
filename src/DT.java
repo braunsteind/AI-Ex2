@@ -5,11 +5,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+//Implementation of the DT algorithm
+//The implementation is exactly by the way we learned at the class
 public class DT {
     private Map<Integer, String> attributeInt2String;
     private Map<String, Integer> attributeString2Int;
     private List<String> lines;
 
+    //predict the labels of the examples
     public String[] predict(Example[] data, String[] labels, String[] fields, Example[] test) {
         String[] results = new String[data.length];
 
@@ -22,10 +25,13 @@ public class DT {
             attributeInt2String.put(i, fields[i]);
         }
 
+        //map from the attribute index to the attributes options (e.g. 2 [the index of "sex"] --> "male", "female")
         Map<Integer, List<String>> attributesInt2Options = createAttributeMap(data);
 
+        //build the tree
         Tree tree = DTL(data, attributesInt2Options, labels, getMajority(data, labels));
 
+        //predict the labels
         for (int i = 0; i < test.length; i++) {
             results[i] = getLabel(test[i], tree);
         }
@@ -43,7 +49,7 @@ public class DT {
         return results;
     }
 
-
+    //build the prediction tree
     public Tree DTL(Example[] data, Map<Integer, List<String>> attributes, String[] labels, String def) {
         //if no more examples return default
         if (data.length == 0) {
@@ -100,6 +106,7 @@ public class DT {
         return subTree;
     }
 
+    //get the majority of the data (e.g. 5 "yes" and 2 "no" than return "yes")
     private String getMajority(Example[] data, String[] labels) {
         int[] total = new int[2];
         for (Example example : data) {
@@ -140,6 +147,8 @@ public class DT {
         return current.getValue();
     }
 
+    //choose the best attribute in order the build the tree
+    //the function use entropy as we learned in the class
     private int chooseAttribute(Map<Integer, List<String>> attributes, Example[] examples, String[] labels) {
         int[] total = new int[2];
 
@@ -225,6 +234,7 @@ public class DT {
         return attributeMap;
     }
 
+    //the entropy function
     private double entropy(double a, double b) {
         double sum = a + b;
         double result = (-a / sum) * (Math.log(a / sum) / Math.log(2)) + (-b / sum) * (Math.log(b / sum) / Math.log(2));
@@ -234,6 +244,7 @@ public class DT {
         return result;
     }
 
+    //write the tree to list
     private void writeTree(Tree root, String tabs) {
         Tree current = root;
         Map<String, Tree> sons = current.getSons();
@@ -268,23 +279,30 @@ public class DT {
         }
     }
 
+    //Tree class that is like graph. Each object have a value for itself, and sons that he can travel
+    // to using a map. The map is from String to another tree, where the String is a attribute.
+    // for example, the value is "sex" and the map is ("male" --> tree1, "female" --> tree2).
     private class Tree {
         Map<String, Tree> sons;
         private String value;
 
+        //constructor
         public Tree(String value) {
             this.value = value;
             sons = new HashMap<>();
         }
 
+        //adding a son to the tree
         public void addSon(String key, Tree son) {
             sons.put(key, son);
         }
 
+        //get the map
         public Map<String, Tree> getSons() {
             return sons;
         }
 
+        //get the value
         public String getValue() {
             return value;
         }

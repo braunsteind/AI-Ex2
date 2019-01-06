@@ -8,12 +8,14 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
+//The main class of ex2
+//Here we run all the algorithms
 public class java_ex2 {
-    //TODO change path before submitting
-    private static final String TRAIN_PATH = "C:\\Users\\DANIEL\\IdeaProjects\\AI-Ex2\\src\\train.txt";
-    private static final String TEST_PATH = "C:\\Users\\DANIEL\\IdeaProjects\\AI-Ex2\\src\\test.txt";
+    private static final String TRAIN_PATH = "train.txt";
+    private static final String TEST_PATH = "test.txt";
 
 
+    //The main function
     public static void main(String[] args) {
         String[] fields = null;
         String[] labels = null;
@@ -37,6 +39,7 @@ public class java_ex2 {
             return;
         }
 
+        //predict the labels with 3 algorithms
         DT dt = new DT();
         String[] resultsDT = dt.predict(data, labels, fields, test);
         String[] resultsKNN = KNN.predict(data, labels, test);

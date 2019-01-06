@@ -1,7 +1,8 @@
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+//Implementation of the KNN algorithm as we learned in class
+//The class calculates the label of examples by the K nearest neighbors
 public class KNN {
     private static final int K = 5;
 
@@ -38,15 +39,12 @@ public class KNN {
         }
 
         //sort the distances first by distance, second by index (smaller first)
-        distances.sort(new Comparator<Point>() {
-            @Override
-            public int compare(Point o1, Point o2) {
-                int result = o1.distance - o2.distance;
-                if (result != 0) {
-                    return result;
-                }
-                return o1.index - o2.index;
+        distances.sort((o1, o2) -> {
+            int result = o1.distance - o2.distance;
+            if (result != 0) {
+                return result;
             }
+            return o1.index - o2.index;
         });
 
         //get the index of the label
@@ -85,6 +83,8 @@ public class KNN {
         return distance;
     }
 
+    //Point class
+    //Each point have index of an example and distance from an given example
     private static class Point {
         public int index;
         public int distance;
