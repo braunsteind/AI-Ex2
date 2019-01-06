@@ -2,6 +2,7 @@ import java.util.*;
 
 public class DT {
     private List<Integer> attributes;
+    private Map<String, Integer> attributeString2Int;
 
     public String[] predict(Example[] data, String[] labels) {
         String[] results = new String[data.length];
@@ -195,22 +196,22 @@ public class DT {
 
     private class Tree {
         private String value;
-        private List<Tree> sons;
+        Map<String, Tree> sons;
 
         public Tree() {
-            sons = new LinkedList<>();
+            sons = new HashMap<>();
         }
 
         public Tree(String value) {
             this.value = value;
-            sons = new LinkedList<>();
+            sons = new HashMap<>();
         }
 
-        public void addSon(Tree son) {
-            sons.add(son);
+        public void addSon(String key, Tree son) {
+            sons.put(key, son);
         }
 
-        public List<Tree> getSons() {
+        public Map<String, Tree> getSons() {
             return sons;
         }
 
