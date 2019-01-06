@@ -38,12 +38,12 @@ public class java_ex2 {
         }
 
         DT dt = new DT();
-        String[] resultsDT = dt.predict(data, labels);
+        String[] resultsDT = dt.predict(data, labels, fields, test);
         String[] resultsKNN = KNN.predict(data, labels, test);
         String[] resultsNaive = Naive.predict(data, labels, test);
 
         //calculate accuracy
-        double accuracy1 = 0;
+        double accuracy1 = calcAccuracy(test, resultsDT);
         double accuracy2 = calcAccuracy(test, resultsKNN);
         double accuracy3 = calcAccuracy(test, resultsNaive);
 

@@ -1,44 +1,44 @@
 import java.util.*;
 
 public class DT {
-    private List<Integer> attributes;
+    private Map<Integer, String> attributeInt2String;
     private Map<String, Integer> attributeString2Int;
 
-    public String[] predict(Example[] data, String[] labels) {
+    public String[] predict(Example[] data, String[] labels, String[] fields, Example[] test) {
         String[] results = new String[data.length];
 
-        Map<Integer, List<String>> attributeMap = createAttributeMap(data);
-        Tree tree = DTL(data, null, labels);
-        List<Integer> attributes = new LinkedList<>();
+        //create maps
+        attributeString2Int = new HashMap<>();
+        attributeInt2String = new HashMap<>();
 
-        for (int i = 0; i < data.length; i++) {
-            results[i] = getLabel(data[i], tree, attributes);
+        for (int i = 0; i < fields.length; i++) {
+            attributeString2Int.put(fields[i], i);
+            attributeInt2String.put(i, fields[i]);
+        }
+
+        Map<Integer, List<String>> attributesInt2Options = createAttributeMap(data);
+
+        Tree tree = DTL(data, attributesInt2Options, labels, getMajority(data, labels));
+
+        for (int i = 0; i < test.length; i++) {
+            results[i] = getLabel(test[i], tree);
         }
 
         return results;
     }
 
 
-    public Tree DTL(Example[] data, Map<Integer, List<String>> attributes, String[] labels) {
-//        if (data.length == 0) {
-//            return ;
-//        }
+    public Tree DTL(Example[] data, Map<Integer, List<String>> attributes, String[] labels, String def) {
+        //if no more examples return default
+        if (data.length == 0) {
+            return new Tree(def);
+        }
 
         //if no more attributes
-        if (attributes.size() == 0) {
+        if (attributes.isEmpty()) {
             //select the majority
-            int[] total = new int[2];
-            for (Example example : data) {
-                if (example.getLabel().equals(labels[0])) {
-                    total[0]++;
-                } else {
-                    total[1]++;
-                }
-            }
-            if (total[0] > total[1]) {
-                return new Tree(labels[0]);
-            }
-            return new Tree(labels[1]);
+            String majority = getMajority(data, labels);
+            return new Tree(majority);
         }
 
         //check if all examples have the same label
@@ -47,9 +47,11 @@ public class DT {
         for (Example example : data) {
             if (!example.getLabel().equals(first.getLabel())) {
                 flag = false;
+                break;
             }
         }
         if (flag) {
+            //select the label
             return new Tree(first.getLabel());
         }
 
@@ -59,7 +61,7 @@ public class DT {
         List<String> options = attributes.get(best);
 
         //create new sub-tree
-        Tree subTree = new Tree();
+        Tree subTree = new Tree(attributeInt2String.get(best));
         for (int i = 0; i < options.size(); i++) {
             String option = options.get(i);
             List<Example> newExamples = new LinkedList<>();
@@ -75,42 +77,51 @@ public class DT {
             Example[] newExamplesArray = newExamples.toArray(new Example[newExamples.size()]);
             Map<Integer, List<String>> newAttributes = new HashMap<>(attributes);
             newAttributes.remove(best);
-            Tree branch = DTL(newExamplesArray, newAttributes, labels);
-            subTree.addSon(branch);
+            Tree branch = DTL(newExamplesArray, newAttributes, labels, getMajority(newExamplesArray, labels));
+            subTree.addSon(option, branch);
         }
 
         return subTree;
     }
 
+    private String getMajority(Example[] data, String[] labels) {
+        int[] total = new int[2];
+        for (Example example : data) {
+            if (example.getLabel().equals(labels[0])) {
+                total[0]++;
+            } else {
+                total[1]++;
+            }
+        }
+        if (total[0] > total[1]) {
+            return labels[0];
+        }
+        return labels[1];
+    }
+
     /**
      * Get the label of a given example
      *
-     * @param example    The given example
-     * @param root       The root of the tree
-     * @param attributes Sorted attributes list of the tree
+     * @param example The given example
+     * @param root    The root of the tree
      * @return The predicted label of the example
      */
-    public String getLabel(Example example, Tree root, List<Integer> attributes) {
+    public String getLabel(Example example, Tree root) {
         Tree current = root;
         //get the example fields (e.g. "adult", "male")
         String[] fields = example.getFields();
 
-        //travel the tree by attributes (e.g. "sex")
-        for (Integer attribute : attributes) {
-            //if no sons return the label (e.g. "yes")
-            if (current.getSons().size() == 0) {
-                return current.getValue();
-            }
-            //for each son of the current node (e.g. "male", "female")
-            for (Tree son : root.getSons()) {
-                //if the right attribute (e.g. "male")
-                if (fields[attribute].equals(son.getValue())) {
-                    //change the current node to the son
-                    current = son;
-                }
-            }
+        //while can go down in the tree
+        while (!current.sons.isEmpty()) {
+            //attribute name (e.g. "sex")
+            String attributeName = current.value;
+            int attributeIndex = attributeString2Int.get(attributeName);
+            //son (e.g. "male")
+            String son = fields[attributeIndex];
+            //make the son the current node
+            current = current.getSons().get(son);
         }
-        return "";
+        return current.getValue();
     }
 
     private int chooseAttribute(Map<Integer, List<String>> attributes, Example[] examples, String[] labels) {
@@ -132,12 +143,13 @@ public class DT {
         double[] results = new double[attributes.size()];
 
         //count the labels for each options at each attribute
-        for (int i = 0; i < attributes.size(); i++) {
+        int i = 0;
+        for (Integer attribute : attributes.keySet()) {
             results[i] = s;
-            int[] counter = new int[2];
-            List<String> options = attributes.get(i);
+            List<String> options = attributes.get(attribute);
             //for every option in the attribute
             for (int j = 0; j < options.size(); j++) {
+                int[] counter = new int[2];
                 String option = options.get(j);
                 //go over the examples
                 for (Example example : examples) {
@@ -151,19 +163,24 @@ public class DT {
                             counter[1]++;
                         }
                     }
-                    results[i] -= ((counter[0] + counter[1]) / sumTotal) * entropy(counter[0], counter[1]);
                 }
+                double p = ((double) (counter[0] + counter[1])) / (double) sumTotal;
+                double entropy = entropy(counter[0], counter[1]);
+                results[i] -= p * entropy;
             }
+            i++;
         }
 
         //return the max index
+        i = 0;
         int maxIndex = 0;
-        double max = results[0];
-        for (int i = 0; i < results.length; i++) {
+        double max = Double.NEGATIVE_INFINITY;
+        for (Integer attribute : attributes.keySet()) {
             if (results[i] > max) {
                 max = results[i];
-                maxIndex = i;
+                maxIndex = attribute;
             }
+            i++;
         }
 
         return maxIndex;
@@ -181,17 +198,24 @@ public class DT {
             for (Example example : data) {
 
                 String[] fields = example.getFields();
-                if (options.contains(fields[i])) {
+                if (!options.contains(fields[i])) {
                     options.add(fields[i]);
                 }
             }
             Collections.sort(options);
             attributeMap.put(i, options);
         }
+
+        return attributeMap;
     }
 
-    private double entropy(int a, int b) {
-        return -a * (Math.log(a) / Math.log(2)) - b * (Math.log(b) / Math.log(2));
+    private double entropy(double a, double b) {
+        double sum = a + b;
+        double result = (-a / sum) * (Math.log(a / sum) / Math.log(2)) + (-b / sum) * (Math.log(b / sum) / Math.log(2));
+        if (Double.isNaN(result)) {
+            return 0;
+        }
+        return result;
     }
 
     private class Tree {
