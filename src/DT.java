@@ -1,8 +1,14 @@
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class DT {
     private Map<Integer, String> attributeInt2String;
     private Map<String, Integer> attributeString2Int;
+    private List<String> lines;
 
     public String[] predict(Example[] data, String[] labels, String[] fields, Example[] test) {
         String[] results = new String[data.length];
@@ -22,6 +28,16 @@ public class DT {
 
         for (int i = 0; i < test.length; i++) {
             results[i] = getLabel(test[i], tree);
+        }
+
+        //print tree to file
+        lines = new LinkedList<>();
+        writeTree(tree, "");
+        Path file = Paths.get("output_tree.txt");
+        try {
+            Files.write(file, lines, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
 
         return results;
@@ -77,7 +93,7 @@ public class DT {
             Example[] newExamplesArray = newExamples.toArray(new Example[newExamples.size()]);
             Map<Integer, List<String>> newAttributes = new HashMap<>(attributes);
             newAttributes.remove(best);
-            Tree branch = DTL(newExamplesArray, newAttributes, labels, getMajority(newExamplesArray, labels));
+            Tree branch = DTL(newExamplesArray, newAttributes, labels, getMajority(data, labels));
             subTree.addSon(option, branch);
         }
 
@@ -218,13 +234,43 @@ public class DT {
         return result;
     }
 
-    private class Tree {
-        private String value;
-        Map<String, Tree> sons;
+    private void writeTree(Tree root, String tabs) {
+        Tree current = root;
+        Map<String, Tree> sons = current.getSons();
 
-        public Tree() {
-            sons = new HashMap<>();
+        //if label
+        if (sons.isEmpty()) {
+            //get the last line
+            int lastLineIndex = lines.size() - 1;
+            String lastLine = lines.get(lastLineIndex);
+            //remove the last line
+            lines.remove(lastLineIndex);
+            //rewrite the last line
+            lines.add(lastLine + ":" + current.getValue());
         }
+
+        //get attributes
+        List<String> attributeNames = new LinkedList<>();
+        for (String attributeName : sons.keySet()) {
+            attributeNames.add(attributeName);
+        }
+
+        //print the attributes
+        attributeNames.sort(String::compareTo);
+        for (String attributeName : attributeNames) {
+            if (tabs.equals("")) {
+                lines.add(current.getValue() + "=" + attributeName);
+            } else {
+                lines.add(tabs + "|" + current.getValue() + "=" + attributeName);
+            }
+            //keep writing the tree
+            writeTree(sons.get(attributeName), tabs + "\t");
+        }
+    }
+
+    private class Tree {
+        Map<String, Tree> sons;
+        private String value;
 
         public Tree(String value) {
             this.value = value;

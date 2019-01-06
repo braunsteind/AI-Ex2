@@ -53,7 +53,6 @@ public class java_ex2 {
         for (int i = 0; i < test.length; i++) {
             lines.add((i + 1) + "\t" + resultsDT[i] + "\t" + resultsKNN[i] + "\t" + resultsNaive[i]);
         }
-//        lines.add(accuracy1);
         lines.add("\t" + accuracy1 + "\t" + accuracy2 + "\t" + accuracy3);
 
         Path file = Paths.get("output.txt");
