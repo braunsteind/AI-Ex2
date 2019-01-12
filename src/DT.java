@@ -180,7 +180,7 @@ public class DT {
                 for (Example example : examples) {
                     String[] fields = example.getFields();
                     //if the field is relevant
-                    if (fields[i].equals(option)) {
+                    if (fields[attribute].equals(option)) {
                         //check its label and count
                         if (example.getLabel().equals(labels[0])) {
                             counter[0]++;
