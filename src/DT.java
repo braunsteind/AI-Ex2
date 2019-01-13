@@ -116,7 +116,16 @@ public class DT {
                 total[1]++;
             }
         }
+
+        //check which label has the majority
         if (total[0] > total[1]) {
+            return labels[0];
+        }
+        if (total[0] < total[1]) {
+            return labels[1];
+        }
+        //if equal return the "yes"/"T" label
+        if (labels[0].equals("yes") || labels[0].equals("T")) {
             return labels[0];
         }
         return labels[1];
