@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -56,14 +57,15 @@ public class java_ex2 {
         for (int i = 0; i < test.length; i++) {
             lines.add((i + 1) + "\t" + resultsDT[i] + "\t" + resultsKNN[i] + "\t" + resultsNaive[i]);
         }
-        lines.add("\t" + accuracy1 + "\t" + accuracy2 + "\t" + accuracy3);
-
+        String accuracy = "\t" + accuracy1 + "\t" + accuracy2 + "\t" + accuracy3;
         Path file = Paths.get("output.txt");
         try {
             Files.write(file, lines, Charset.forName("UTF-8"));
+            Files.write(file, accuracy.getBytes("UTF-8"), StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+
     }
 
     //calculate the accuracy of the prediction
